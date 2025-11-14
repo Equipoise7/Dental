@@ -40,14 +40,8 @@
     }
     </script>
     <style>
-      html, body {
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-      }
-
       #preloader {
-        position: absolute;
+        position: fixed;
         top: 0;
         left: 0;
         right: 0;
@@ -71,8 +65,10 @@
       }
       
       body.preloader-active {
-        overflow: hidden;
+        overflow: hidden !important;
         height: 100vh;
+        position: fixed;
+        width: 100%;
       }
 
       .preloader-content {
@@ -129,7 +125,7 @@
         to { transform: rotate(360deg); }
       }
     </style>
-    <script type="module" crossorigin src="/Dental/assets/index-DrsJvi4t.js"></script>
+    <script type="module" crossorigin src="/Dental/assets/index-DOKplL0z.js"></script>
     <link rel="stylesheet" crossorigin href="/Dental/assets/index-wE0O2dMO.css">
   <link rel="manifest" href="/Dental/manifest.webmanifest"></head>
   <body class="preloader-active">
