@@ -143,7 +143,7 @@ onUnmounted(() => {
 	background: linear-gradient(180deg, var(--primary-dark) 0%, #1a1f2e 100%);
 	color: white;
 	margin-top: 0;
-	padding: 4rem 2rem 2rem;
+	padding: 4rem 2rem 0;
 }
 
 .footer-content {
