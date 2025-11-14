@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "preserve",
+    "jsxImportSource": "vue",
+    "allowJs": true,
+    "checkJs": false,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "*.js",
+    "*.jsx",
+    "*.vue"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "server"
+  ],
+  "vueCompilerOptions": {
+    "target": 3
+  }
+}

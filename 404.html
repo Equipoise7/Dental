@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Страница не найдена — Перенаправление...</title>
+    <meta name="robots" content="noindex" />
+    <script>
+      // GitHub Pages SPA fallback: перенаправляем на index.html, сохраняя путь в хэше
+      const redirect = () => {
+        const l = window.location
+        const path = l.pathname.replace(/\/vue-tour-osetia\//, '')
+        if (!l.pathname.endsWith('index.html')) {
+          window.location.replace('/vue-tour-osetia/index.html#' + path + l.search)
+        }
+      }
+      redirect()
+    </script>
+  </head>
+  <body>
+    <p>Перенаправление...</p>
+  </body>
+</html>
+
