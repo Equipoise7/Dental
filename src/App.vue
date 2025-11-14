@@ -13,6 +13,8 @@ import { useI18n } from 'vue-i18n'
 
 const { t, locale } = useI18n()
 
+const showPreloader = ref(true)
+
 const scrollToAppointment = () => {
   const element = document.querySelector('.appointment-form')
   element?.scrollIntoView({ behavior: 'smooth' })
@@ -73,6 +75,11 @@ const handleScroll = () => {
 onMounted(() => {
   startTyping()
   window.addEventListener('scroll', handleScroll, { passive: true })
+  
+  // Скрываем прелоадер через 1 секунду
+  setTimeout(() => {
+    showPreloader.value = false
+  }, 1000)
 })
 
 onUnmounted(() => {
@@ -91,6 +98,17 @@ watch(locale, (newLocale) => {
 
 <template>
   <div class="app">
+    <!-- Прелоадер -->
+    <transition name="preloader-fade">
+      <div v-if="showPreloader" class="preloader">
+        <div class="preloader-content">
+          <div class="tooth-icon">🦷</div>
+          <div class="spinner"></div>
+          <div class="preloader-text">Загрузка...</div>
+        </div>
+      </div>
+    </transition>
+
     <section class="hero-section" aria-label="Главная секция">
   <div class="hero-background" :style="{ transform: `translate3d(0, ${heroParallax}px, 0)` }" aria-hidden="true"></div>
       <div class="stars"></div>
@@ -139,6 +157,87 @@ watch(locale, (newLocale) => {
 </template>
 
 <style scoped>
+.preloader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #1a202c 0%, #2c5282 50%, #2d3748 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  overflow: hidden;
+}
+
+.preloader-content {
+  text-align: center;
+  color: white;
+}
+
+.tooth-icon {
+  font-size: 4rem;
+  animation: bounce 1s ease-in-out infinite;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  margin: 2rem auto;
+  position: relative;
+}
+
+.spinner::before,
+.spinner::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: white;
+}
+
+.spinner::before {
+  inset: 0;
+  animation: spin 1s linear infinite;
+}
+
+.spinner::after {
+  inset: 8px;
+  border-top-color: rgba(255, 255, 255, 0.5);
+  animation: spin 1.5s linear infinite reverse;
+}
+
+.preloader-text {
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.preloader-fade-enter-active,
+.preloader-fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.preloader-fade-enter-from,
+.preloader-fade-leave-to {
+  opacity: 0;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 .app {
   min-height: 100vh;
   background: var(--background);
