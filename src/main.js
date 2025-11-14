@@ -12,8 +12,10 @@ app.use(i18n)
 // Прелоадер с минимальной задержкой
 const hidePreloader = () => {
 	const preloader = document.getElementById('preloader')
+	const body = document.body
 	if (preloader) {
 		preloader.classList.add('fade-out')
+		body.classList.remove('preloader-active')
 		setTimeout(() => {
 			preloader.remove()
 		}, 500)
