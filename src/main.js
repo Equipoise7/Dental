@@ -6,6 +6,33 @@ import { registerSW } from 'virtual:pwa-register'
 
 registerSW({ immediate: true })
 
-createApp(App)
-	.use(i18n)
-	.mount('#app')
+const app = createApp(App)
+app.use(i18n)
+
+// Прелоадер с минимальной задержкой
+const hidePreloader = () => {
+	const preloader = document.getElementById('preloader')
+	if (preloader) {
+		preloader.classList.add('fade-out')
+		setTimeout(() => {
+			preloader.remove()
+		}, 500)
+	}
+}
+
+// Монтируем приложение и показываем через минимальную задержку
+app.mount('#app')
+
+// Показываем контент после загрузки или через 1.5 секунды минимум
+const minDisplayTime = 1500
+const startTime = performance.now()
+
+if (document.readyState === 'complete') {
+	const elapsed = performance.now() - startTime
+	setTimeout(hidePreloader, Math.max(0, minDisplayTime - elapsed))
+} else {
+	window.addEventListener('load', () => {
+		const elapsed = performance.now() - startTime
+		setTimeout(hidePreloader, Math.max(0, minDisplayTime - elapsed))
+	})
+}

@@ -20,7 +20,13 @@ const doctor = computed(() => ({
 		<div class="card-header">
 			<div class="stars-doctor"></div>
 			<div class="doctor-avatar">
-				<img :src="ZarinaPhoto" alt="Джатиева Зарина Владимировна" class="avatar-photo" />
+				<img 
+					:src="ZarinaPhoto" 
+					alt="Джатиева Зарина Владимировна" 
+					class="avatar-photo"
+					loading="eager"
+					fetchpriority="high"
+				/>
 			</div>
 			<div class="doctor-info">
 				<h2 class="doctor-name">{{ doctor.name }}</h2>
