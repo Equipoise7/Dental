@@ -40,14 +40,8 @@
     }
     </script>
     <style>
-      html, body {
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-      }
-
       #preloader {
-        position: absolute;
+        position: fixed;
         top: 0;
         left: 0;
         right: 0;
@@ -71,8 +65,10 @@
       }
       
       body.preloader-active {
-        overflow: hidden;
+        overflow: hidden !important;
         height: 100vh;
+        position: fixed;
+        width: 100%;
       }
 
       .preloader-content {

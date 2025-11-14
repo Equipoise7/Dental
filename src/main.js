@@ -13,9 +13,16 @@ app.use(i18n)
 const hidePreloader = () => {
 	const preloader = document.getElementById('preloader')
 	const body = document.body
+	const html = document.documentElement
+	
 	if (preloader) {
 		preloader.classList.add('fade-out')
 		body.classList.remove('preloader-active')
+		body.style.overflow = ''
+		body.style.position = ''
+		body.style.width = ''
+		html.style.overflow = ''
+		
 		setTimeout(() => {
 			preloader.remove()
 		}, 500)
