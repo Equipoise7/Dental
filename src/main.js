@@ -23,8 +23,8 @@ const hidePreloader = () => {
 // Монтируем приложение и показываем через минимальную задержку
 app.mount('#app')
 
-// Показываем контент после загрузки или через 1.5 секунды минимум
-const minDisplayTime = 1500
+// Показываем контент после загрузки или через 1 секунду минимум
+const minDisplayTime = 1000
 const startTime = performance.now()
 
 if (document.readyState === 'complete') {
