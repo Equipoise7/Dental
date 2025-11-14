@@ -1,5 +1,8 @@
 import { createI18n } from 'vue-i18n'
 
+// Читаем сохранённую локаль (если есть) для сохранения выбора пользователя между перезагрузками
+const savedLocale = typeof window !== 'undefined' ? localStorage.getItem('locale') : null
+
 const messages = {
   ru: {
     hero: {
@@ -12,6 +15,13 @@ const messages = {
       experience: 'Лет опыта',
       satisfaction: 'Удовлетворенность',
       services: 'Видов услуг'
+    },
+    beforeAfter: {
+      title: 'До и После',
+      subtitle: 'Реальные результаты нашей работы',
+      before: 'До',
+      after: 'После',
+      hint: '👆 Перетащите ползунок, чтобы увидеть разницу'
     },
     doctor: {
       name: 'Джатиева Зарина Владимировна',
@@ -193,6 +203,13 @@ const messages = {
       satisfaction: 'Satisfaction rate',
       services: 'Types of services'
     },
+    beforeAfter: {
+      title: 'Before & After',
+      subtitle: 'Real results of our work',
+      before: 'Before',
+      after: 'After',
+      hint: '👆 Drag the slider to see the difference'
+    },
     doctor: {
       name: 'Zarina Vladimirovna Dzhatieva',
       specialization: 'Dentist',
@@ -365,7 +382,10 @@ const messages = {
 
 export const i18n = createI18n({
   legacy: false,
-  locale: 'ru',
+  // Явно включаем глобальную инъекцию $t / $i18n в шаблонах
+  globalInjection: true,
+  // Стартовая локаль — сохранённая или ru по умолчанию
+  locale: savedLocale || 'ru',
   fallbackLocale: 'ru',
   messages
 })

@@ -14,12 +14,14 @@ export default defineConfig({
         name: 'Стоматологическая клиника',
         short_name: 'Стоматология',
         description: 'Профессиональная стоматологическая помощь',
+        start_url: '/Dental/',
+        scope: '/Dental/',
         theme_color: '#2c5282',
         background_color: '#ffffff',
         display: 'standalone',
         icons: [
           {
-            src: '/vite.svg',
+            src: 'vite.svg',
             sizes: '192x192',
             type: 'image/svg+xml'
           }

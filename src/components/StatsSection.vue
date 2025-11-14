@@ -5,10 +5,10 @@ import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 
 const stats = ref([
-	{ value: 0, target: 500, suffix: '+', label: t('stats.patients') },
-	{ value: 0, target: 7, suffix: '+', label: t('stats.experience') },
-	{ value: 0, target: 100, suffix: '%', label: t('stats.satisfaction') },
-	{ value: 0, target: 15, suffix: '+', label: t('stats.services') }
+	{ value: 0, target: 500, suffix: '+', labelKey: 'stats.patients' },
+	{ value: 0, target: 7, suffix: '+', labelKey: 'stats.experience' },
+	{ value: 0, target: 100, suffix: '%', labelKey: 'stats.satisfaction' },
+	{ value: 0, target: 15, suffix: '+', labelKey: 'stats.services' }
 ])
 
 const hasAnimated = ref(false)
@@ -74,7 +74,7 @@ onMounted(() => {
 				<div class="stat-value">
 					{{ stat.value }}{{ stat.suffix }}
 				</div>
-				<div class="stat-label">{{ stat.label }}</div>
+				<div class="stat-label">{{ $t(stat.labelKey) }}</div>
 				<div class="stat-decoration"></div>
 			</div>
 		</div>

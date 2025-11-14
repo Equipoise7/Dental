@@ -1,12 +1,8 @@
 <script setup>
 import { ref } from 'vue'
+import { contacts as contactsConst } from '../constants/contacts'
 
-const contacts = ref({
-	phone: '+79897443962',
-	phoneDisplay: '+7 989 744 39 62',
-	whatsapp: '+79897443962',
-	telegram: 'dentist_username'
-})
+const contacts = ref(contactsConst)
 
 const openWhatsApp = () => {
 	window.open(`https://wa.me/${contacts.value.whatsapp.replace(/\D/g, '')}`, '_blank')

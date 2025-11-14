@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import DoctorCard from './components/DoctorCard.vue'
 import StatsSection from './components/StatsSection.vue'
 import FeaturesSection from './components/FeaturesSection.vue'
@@ -11,7 +11,7 @@ import ContactLinks from './components/ContactLinks.vue'
 import FooterMap from './components/FooterMap.vue'
 import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const scrollToAppointment = () => {
   const element = document.querySelector('.appointment-form')
@@ -27,6 +27,33 @@ let lastScrollY = 0
 const fullText = ref('')
 let typingTimer = null
 let cursorTimer = null
+
+const startTyping = () => {
+  // Очистка предыдущих таймеров и состояния
+  if (typingTimer) clearInterval(typingTimer)
+  if (cursorTimer) clearInterval(cursorTimer)
+  typedText.value = ''
+  showCursor.value = true
+
+  // Берем актуальный локализованный текст
+  fullText.value = t('hero.title')
+
+  let charIndex = 0
+  typingTimer = setInterval(() => {
+    if (charIndex < fullText.value.length) {
+      typedText.value = fullText.value.substring(0, charIndex + 1)
+      charIndex++
+    } else {
+      clearInterval(typingTimer)
+      setTimeout(() => (showCursor.value = false), 300)
+    }
+  }, 100)
+
+  // Моргание курсора
+  cursorTimer = setInterval(() => {
+    showCursor.value = !showCursor.value
+  }, 500)
+}
 
 const handleScroll = () => {
   const currentScrollY = window.scrollY
@@ -44,22 +71,7 @@ const handleScroll = () => {
 }
 
 onMounted(() => {
-  fullText.value = t('hero.title')
-  
-  let charIndex = 0
-  typingTimer = setInterval(() => {
-    if (charIndex < fullText.value.length) {
-      typedText.value = fullText.value.substring(0, charIndex + 1)
-      charIndex++
-    } else {
-      clearInterval(typingTimer)
-      if (cursorTimer) clearInterval(cursorTimer)
-      showCursor.value = true
-      setTimeout(() => showCursor.value = false, 300)
-    }
-  }, 100)
-
-  cursorTimer = setInterval(() => showCursor.value = !showCursor.value, 500)
+  startTyping()
   window.addEventListener('scroll', handleScroll, { passive: true })
 })
 
@@ -68,12 +80,19 @@ onUnmounted(() => {
   if (cursorTimer) clearInterval(cursorTimer)
   window.removeEventListener('scroll', handleScroll)
 })
+
+// Перезапускаем анимацию набора при смене языка и сохраняем выбор
+watch(locale, (newLocale) => {
+  try { localStorage.setItem('locale', newLocale) } catch (e) {}
+  try { document.documentElement.setAttribute('lang', newLocale) } catch (e) {}
+  startTyping()
+})
 </script>
 
 <template>
   <div class="app">
     <section class="hero-section" aria-label="Главная секция">
-      <div class="hero-background" :style="{ transform: `translate3d(0, ${heroParallax}px, 0)` }" aria-hidden="true"></div>
+  <div class="hero-background" :style="{ transform: `translate3d(0, ${heroParallax}px, 0)` }" aria-hidden="true"></div>
       <div class="stars"></div>
       <div class="container">
         <header class="header" :class="{ 'header-hidden': !showHeader }">
@@ -82,8 +101,8 @@ onUnmounted(() => {
             <span class="logo-text">{{ $t('footer.title') }}</span>
           </div>
           <div class="lang-switcher">
-            <button :class="{ active: $i18n.locale === 'ru' }" @click="$i18n.locale='ru'" aria-label="Русский">RU</button>
-            <button :class="{ active: $i18n.locale === 'en' }" @click="$i18n.locale='en'" aria-label="English">EN</button>
+            <button :class="{ active: locale === 'ru' }" @click="locale = 'ru'" aria-label="Русский">RU</button>
+            <button :class="{ active: locale === 'en' }" @click="locale = 'en'" aria-label="English">EN</button>
           </div>
         </header>
         

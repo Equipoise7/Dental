@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePhoneFormat } from '../composables/usePhoneFormat'
 
@@ -28,6 +28,7 @@ const services = computed(() => tm('appointment.services'))
 const isSubmitting = ref(false)
 const showSuccess = ref(false)
 const serverUnavailable = ref(false)
+const containerEl = ref(null)
 
 // Обёртка для передачи formData в composable
 const handlePhoneInput = (event) => {
@@ -48,6 +49,23 @@ const handleSubmit = async () => {
   isSubmitting.value = true
 
   try {
+    // Демонстрационный режим на GitHub Pages: имитируем успешную отправку
+    if (typeof window !== 'undefined' && window.location.hostname.endsWith('github.io')) {
+      await new Promise(r => setTimeout(r, 600))
+      isSubmitting.value = false
+      showSuccess.value = true
+      fireConfetti()
+      // Сброс формы
+      formData.name = ''
+      formData.phone = PHONE_PREFIX
+      formData.date = ''
+      formData.time = ''
+      formData.service = ''
+      formData.comment = ''
+      setTimeout(() => { showSuccess.value = false }, 5000)
+      return
+    }
+
     const res = await fetch('/api/appointment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -68,8 +86,9 @@ const handleSubmit = async () => {
       return
     }
 
-    isSubmitting.value = false
-    showSuccess.value = true
+  isSubmitting.value = false
+  showSuccess.value = true
+  fireConfetti()
     // Сброс формы
     formData.name = ''
     formData.phone = PHONE_PREFIX
@@ -85,10 +104,74 @@ const handleSubmit = async () => {
     serverUnavailable.value = true
   }
 }
+
+// Простой конфетти-эффект без зависимостей
+let confettiTimer
+const fireConfetti = () => {
+  const container = containerEl.value
+  if (!container) return
+
+  const canvas = document.createElement('canvas')
+  const rect = container.getBoundingClientRect()
+  canvas.width = rect.width
+  canvas.height = rect.height
+  canvas.style.position = 'absolute'
+  canvas.style.left = '0'
+  canvas.style.top = '0'
+  canvas.style.pointerEvents = 'none'
+  canvas.style.zIndex = '10'
+  container.appendChild(canvas)
+
+  const ctx = canvas.getContext('2d')
+  const colors = ['#63b3ed', '#3182ce', '#ffffff', '#f6ad55', '#90cdf4']
+  const PARTICLES = 80
+  const particles = Array.from({ length: PARTICLES }).map(() => ({
+    x: Math.random() * canvas.width,
+    y: -10 - Math.random() * 60,
+    r: 2 + Math.random() * 3,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    vx: -2 + Math.random() * 4,
+    vy: 2 + Math.random() * 3,
+    ay: 0.05 + Math.random() * 0.05,
+    angle: Math.random() * Math.PI,
+    spin: -0.2 + Math.random() * 0.4
+  }))
+
+  let start = null
+  const duration = 1200
+
+  const draw = (ts) => {
+    if (!start) start = ts
+    const elapsed = ts - start
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    particles.forEach(p => {
+      p.vy += p.ay
+      p.x += p.vx
+      p.y += p.vy
+      p.angle += p.spin
+      ctx.save()
+      ctx.translate(p.x, p.y)
+      ctx.rotate(p.angle)
+      ctx.fillStyle = p.color
+      ctx.fillRect(-p.r, -p.r, p.r * 2, p.r * 2)
+      ctx.restore()
+    })
+    if (elapsed < duration) {
+      confettiTimer = requestAnimationFrame(draw)
+    } else {
+      container.removeChild(canvas)
+    }
+  }
+  confettiTimer = requestAnimationFrame(draw)
+}
+
+onUnmounted(() => {
+  if (confettiTimer) cancelAnimationFrame(confettiTimer)
+})
 </script>
 
 <template>
-  <div class="appointment-form">
+  <div class="appointment-form" ref="containerEl">
     <div class="form-header">
       <h2 class="form-title">{{ $t('appointment.title') }}</h2>
       <p class="form-subtitle">{{ $t('appointment.subtitle') }}</p>

@@ -1,0 +1,17 @@
+{
+  "name": "Стоматологическая клиника",
+  "short_name": "Стоматология",
+  "description": "Профессиональная стоматологическая помощь",
+  "start_url": "/Dental/",
+  "scope": "/Dental/",
+  "display": "standalone",
+  "theme_color": "#2c5282",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "vite.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}
