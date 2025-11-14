@@ -142,6 +142,8 @@ watch(locale, (newLocale) => {
 .app {
   min-height: 100vh;
   background: var(--background);
+  display: flex;
+  flex-direction: column;
 }
 
 .hero-section {
@@ -427,8 +429,9 @@ watch(locale, (newLocale) => {
 }
 
 .main-content {
-  padding: 4rem 0 4rem;
+  padding: 4rem 0 0;
   position: relative;
+  flex: 1;
 }
 
 .main-content > * + * {

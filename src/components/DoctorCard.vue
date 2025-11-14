@@ -355,8 +355,8 @@ const doctor = computed(() => ({
 	}
 
 	.doctor-avatar {
-		width: 120px;
-		height: 120px;
+		width: 160px;
+		height: 200px;
 	}
 
 	.avatar-placeholder {
