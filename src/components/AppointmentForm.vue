@@ -213,7 +213,7 @@ onUnmounted(() => {
           v-model="formData.phone"
           type="tel" 
           class="form-input"
-          placeholder="+7 (XXX) XXX-XX-XX"
+          placeholder="+7 (___) ___-__-__"
           required
           autocomplete="tel"
         />
