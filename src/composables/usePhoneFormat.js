@@ -1,128 +1,110 @@
 /**
  * Composable для форматирования номера телефона
- * Формат: +7 (XXX) XXX-XX-XX
+ * Простой подход: храним только цифры, показываем отформатированный вид
  */
 export function usePhoneFormat() {
-  const PHONE_PREFIX = '+7 '
-  const PHONE_LENGTH = 18 // Полная длина отформатированного номера
+  const PHONE_PREFIX = '+7'
+  const PHONE_LENGTH = 18
 
   /**
-   * Форматирует номер телефона
-   * @param {string} value - Введённое значение
+   * Форматирует номер телефона для отображения
+   * @param {string} digits - Только цифры
    * @returns {string} - Отформатированный номер
    */
-  const formatPhone = (value) => {
-    // Удаляем все кроме цифр
-    let numbers = value.replace(/\D/g, '')
+  const formatPhoneDisplay = (digits) => {
+    if (!digits) return ''
     
-    // Убираем первую 7 или 8, оставляем только 10 цифр
-    if (numbers.startsWith('7') || numbers.startsWith('8')) {
-      numbers = numbers.substring(1)
+    let formatted = '+7'
+    
+    if (digits.length > 0) {
+      formatted += ' (' + digits.substring(0, 3)
+      if (digits.length >= 3) {
+        formatted += ')'
+      }
     }
     
-    // Максимум 10 цифр
-    numbers = numbers.substring(0, 10)
-    
-    // Форматируем
-    let formatted = '+7 '
-    
-    if (numbers.length > 0) {
-      formatted += '(' + numbers.substring(0, 3)
+    if (digits.length > 3) {
+      formatted += ' ' + digits.substring(3, 6)
     }
     
-    if (numbers.length >= 3) {
-      formatted += ') '
+    if (digits.length > 6) {
+      formatted += '-' + digits.substring(6, 8)
     }
     
-    if (numbers.length > 3) {
-      formatted += numbers.substring(3, 6)
-    }
-    
-    if (numbers.length > 6) {
-      formatted += '-' + numbers.substring(6, 8)
-    }
-    
-    if (numbers.length > 8) {
-      formatted += '-' + numbers.substring(8, 10)
+    if (digits.length > 8) {
+      formatted += '-' + digits.substring(8, 10)
     }
     
     return formatted
   }
 
   /**
-   * Валидация номера телефона
-   * @param {string} phone - Номер телефона
-   * @returns {boolean} - Валиден ли номер
+   * Извлекает только цифры из строки
+   * @param {string} value - Введённое значение
+   * @returns {string} - Только цифры
    */
-  const validatePhone = (phone) => {
-    const numbers = phone.replace(/\D/g, '')
-    return numbers.length === 10
+  const extractDigits = (value) => {
+    let digits = value.replace(/\D/g, '')
+    // Убираем первую 7 или 8
+    if (digits.startsWith('7') || digits.startsWith('8')) {
+      digits = digits.substring(1)
+    }
+    return digits.substring(0, 10)
   }
 
   /**
-   * Обработчик ввода в поле телефона
+   * Валидация номера телефона
+   * @param {string} phone - Номер телефона (может быть отформатированным или только цифры)
+   * @returns {boolean} - Валиден ли номер
+   */
+  const validatePhone = (phone) => {
+    const digits = extractDigits(phone)
+    return digits.length === 10
+  }
+
+  /**
+   * Обработчик ввода
    * @param {Event} event - Событие input
    * @param {Object} formData - Реактивный объект данных формы
    */
   const handlePhoneInput = (event, formData) => {
     const input = event.target
-    const cursorPosition = input.selectionStart
-    const oldValue = formData.phone || ''
-    const inputValue = input.value
+    const value = input.value
     
-    // Считаем количество цифр до курсора в старом значении
-    const digitsBeforeCursor = oldValue.substring(0, cursorPosition).replace(/\D/g, '').length
+    // Извлекаем цифры
+    const digits = extractDigits(value)
     
-    // Форматируем новое значение
-    const formatted = formatPhone(inputValue)
-    formData.phone = formatted
+    // Сохраняем только цифры
+    formData.phone = digits
     
-    // Восстанавливаем позицию курсора
-    setTimeout(() => {
-      // Находим позицию курсора по количеству цифр
-      let newPosition = 0
-      let digitCount = 0
-      
-      for (let i = 0; i < formatted.length; i++) {
-        if (digitCount === digitsBeforeCursor) {
-          newPosition = i
-          break
-        }
-        if (/\d/.test(formatted[i])) {
-          digitCount++
-        }
-      }
-      
-      // Если курсор должен быть в конце
-      if (digitCount === digitsBeforeCursor) {
-        newPosition = formatted.length
-      }
-      
-      input.setSelectionRange(newPosition, newPosition)
-    }, 0)
+    // Показываем отформатированный вид
+    input.value = formatPhoneDisplay(digits)
   }
 
   /**
-   * Обработчик клика/фокуса - не требуется
+   * Форматирует номер для отправки на сервер
+   * @param {string} digits - Только цифры
+   * @returns {string} - +7XXXXXXXXXX
    */
-  const handlePhoneClick = () => {
-    // Пустая функция для обратной совместимости
+  const formatPhoneForServer = (digits) => {
+    return '+7' + digits
   }
 
-  /**
-   * Обработчик нажатия клавиш - не требуется
-   */
-  const handlePhoneKeydown = () => {
-    // Пустая функция для обратной совместимости
-  }
+  // Пустые функции для обратной совместимости
+  const handlePhoneClick = () => {}
+  const handlePhoneKeydown = () => {}
+  const formatPhone = formatPhoneDisplay
 
   return {
     PHONE_PREFIX,
     PHONE_LENGTH,
     formatPhone,
+    formatPhoneDisplay,
+    extractDigits,
     validatePhone,
     handlePhoneInput,
     handlePhoneClick,
-    handlePhoneKeydown
+    handlePhoneKeydown,
+    formatPhoneForServer
   }
 }

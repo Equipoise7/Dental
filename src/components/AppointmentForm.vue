@@ -6,12 +6,9 @@ import { usePhoneFormat } from '../composables/usePhoneFormat'
 const { t, tm } = useI18n()
 
 const { 
-  PHONE_PREFIX, 
-  PHONE_LENGTH,
   validatePhone, 
-  handlePhoneInput: handlePhoneInputBase,
-  handlePhoneClick,
-  handlePhoneKeydown
+  handlePhoneInput,
+  formatPhoneDisplay
 } = usePhoneFormat()
 
 const formData = reactive({
@@ -23,6 +20,9 @@ const formData = reactive({
   comment: ''
 })
 
+// Computed для отображения отформатированного телефона
+const phoneDisplay = computed(() => formatPhoneDisplay(formData.phone))
+
 const services = computed(() => tm('appointment.services'))
 
 const isSubmitting = ref(false)
@@ -30,9 +30,8 @@ const showSuccess = ref(false)
 const serverUnavailable = ref(false)
 const containerEl = ref(null)
 
-// Обёртка для передачи formData в composable
-const handlePhoneInput = (event) => {
-  handlePhoneInputBase(event, formData)
+const handlePhoneInputWrapper = (event) => {
+  handlePhoneInput(event, formData)
 }
 
 const handleSubmit = async () => {
@@ -205,15 +204,15 @@ onUnmounted(() => {
         <label for="phone" class="form-label">{{ $t('appointment.phone') }} *</label>
         <input 
           id="phone"
-          v-model="formData.phone"
-          @input="handlePhoneInput"
+          :value="phoneDisplay"
+          @input="handlePhoneInputWrapper"
           type="tel" 
           class="form-input"
-          :placeholder="$t('appointment.phonePlaceholder')"
-          :maxlength="PHONE_LENGTH"
+          placeholder="+7 (XXX) XXX-XX-XX"
+          maxlength="18"
           required
           autocomplete="tel"
-          inputmode="tel"
+          inputmode="numeric"
         />
       </div>
 
