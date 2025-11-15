@@ -47,6 +47,7 @@ const handleSubmit = async () => {
   }
 
   isSubmitting.value = true
+  serverUnavailable.value = false // Сбрасываем предыдущее предупреждение
 
   try {
     // Демонстрационный режим на GitHub Pages: имитируем успешную отправку
@@ -195,6 +196,8 @@ onUnmounted(() => {
           class="form-input"
           :placeholder="$t('appointment.namePlaceholder')"
           required
+          autocomplete="name"
+          maxlength="100"
         />
       </div>
 
@@ -204,18 +207,15 @@ onUnmounted(() => {
           id="phone"
           v-model="formData.phone"
           @input="handlePhoneInput"
-          @mousedown="handlePhoneClick"
-          @mouseup="handlePhoneClick"
           @click="handlePhoneClick"
-            @focus="handlePhoneClick"
-            @select="handlePhoneClick"
+          @focus="handlePhoneClick"
           @keydown="handlePhoneKeydown"
-          @keyup="handlePhoneClick"
           type="tel" 
           class="form-input"
           :placeholder="$t('appointment.phonePlaceholder')"
-            :maxlength="PHONE_LENGTH"
+          :maxlength="PHONE_LENGTH"
           required
+          autocomplete="tel"
         />
       </div>
 
@@ -268,7 +268,9 @@ onUnmounted(() => {
           class="form-input form-textarea"
           :placeholder="$t('appointment.commentPlaceholder')"
           rows="4"
+          maxlength="500"
         ></textarea>
+        <span class="char-counter">{{ formData.comment.length }}/500</span>
       </div>
 
       <div v-if="serverUnavailable" class="server-warning">
@@ -498,6 +500,13 @@ onUnmounted(() => {
   font-size: 0.9rem;
   color: var(--text-light);
   margin: 0;
+}
+
+.char-counter {
+  font-size: 0.85rem;
+  color: var(--text-light);
+  text-align: right;
+  margin-top: 0.25rem;
 }
 
 @media (max-width: 768px) {
