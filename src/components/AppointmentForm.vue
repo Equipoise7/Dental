@@ -1,15 +1,9 @@
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { usePhoneFormat } from '../composables/usePhoneFormat'
+import IMask from 'imask'
 
 const { t, tm } = useI18n()
-
-const { 
-  validatePhone, 
-  handlePhoneInput,
-  formatPhoneDisplay
-} = usePhoneFormat()
 
 const formData = reactive({
   name: '',
@@ -29,10 +23,21 @@ const isSubmitting = ref(false)
 const showSuccess = ref(false)
 const serverUnavailable = ref(false)
 const containerEl = ref(null)
+const phoneInput = ref(null)
 
-const handlePhoneInputWrapper = (event) => {
-  handlePhoneInput(event, formData)
+const validatePhone = (phone) => {
+  const digits = phone.replace(/\D/g, '')
+  return digits.length === 10
 }
+
+// Инициализация маски телефона
+onMounted(() => {
+  if (phoneInput.value) {
+    IMask(phoneInput.value, {
+      mask: '+7 (000) 000-00-00'
+    })
+  }
+})
 
 const handleSubmit = async () => {
   if (!formData.name || !formData.phone || !formData.date || !formData.time) {
@@ -71,7 +76,7 @@ const handleSubmit = async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: formData.name.trim(),
-        phone: formData.phone.trim(),
+        phone: formData.phone.replace(/\D/g, ''),
         date: formData.date,
         time: formData.time,
         service: formData.service,
@@ -204,15 +209,13 @@ onUnmounted(() => {
         <label for="phone" class="form-label">{{ $t('appointment.phone') }} *</label>
         <input 
           id="phone"
-          :value="phoneDisplay"
-          @input="handlePhoneInputWrapper"
+          ref="phoneInput"
+          v-model="formData.phone"
           type="tel" 
           class="form-input"
           placeholder="+7 (XXX) XXX-XX-XX"
-          maxlength="18"
           required
           autocomplete="tel"
-          inputmode="numeric"
         />
       </div>
 
