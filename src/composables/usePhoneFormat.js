@@ -142,6 +142,7 @@ export function usePhoneFormat() {
     const input = event.target
     const cursorPosition = input.selectionStart
     const selectionEnd = input.selectionEnd
+    const currentValue = input.value
     
     // Если есть выделение и оно включает префикс, корректируем
     if (cursorPosition !== selectionEnd && cursorPosition < 4) {
@@ -150,11 +151,50 @@ export function usePhoneFormat() {
       return
     }
     
-    // Блокируем Backspace и Delete только если курсор строго в начале префикса
-    if ((event.key === 'Backspace' && cursorPosition <= 4) || 
-        (event.key === 'Delete' && cursorPosition < 4)) {
-      event.preventDefault()
-      input.setSelectionRange(4, 4)
+    // Обработка Backspace
+    if (event.key === 'Backspace') {
+      // Если курсор в начале (в префиксе +7 (), блокируем
+      if (cursorPosition <= 4) {
+        event.preventDefault()
+        input.setSelectionRange(4, 4)
+        return
+      }
+      
+      // Если курсор стоит на служебном символе (скобка, пробел, дефис), пропускаем его
+      const charBefore = currentValue[cursorPosition - 1]
+      if (charBefore === ')' || charBefore === ' ' || charBefore === '-') {
+        event.preventDefault()
+        // Находим предыдущую цифру и удаляем её
+        let newValue = currentValue.slice(0, cursorPosition - 1) + currentValue.slice(cursorPosition)
+        // Перформатируем
+        const formatted = formatPhone(newValue)
+        input.value = formatted
+        input.dispatchEvent(new Event('input', { bubbles: true }))
+        return
+      }
+    }
+    
+    // Обработка Delete
+    if (event.key === 'Delete') {
+      // Если курсор в префиксе, блокируем
+      if (cursorPosition < 4) {
+        event.preventDefault()
+        input.setSelectionRange(4, 4)
+        return
+      }
+      
+      // Если курсор стоит перед служебным символом, пропускаем его
+      const charAfter = currentValue[cursorPosition]
+      if (charAfter === ')' || charAfter === ' ' || charAfter === '-') {
+        event.preventDefault()
+        // Находим следующую цифру и удаляем её
+        let newValue = currentValue.slice(0, cursorPosition) + currentValue.slice(cursorPosition + 1)
+        // Перформатируем
+        const formatted = formatPhone(newValue)
+        input.value = formatted
+        input.dispatchEvent(new Event('input', { bubbles: true }))
+        return
+      }
     }
   }
 
