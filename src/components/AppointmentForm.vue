@@ -16,7 +16,7 @@ const {
 
 const formData = reactive({
   name: '',
-  phone: PHONE_PREFIX,
+  phone: '',
   date: '',
   time: '',
   service: '',
@@ -58,7 +58,7 @@ const handleSubmit = async () => {
       fireConfetti()
       // Сброс формы
       formData.name = ''
-      formData.phone = PHONE_PREFIX
+      formData.phone = ''
       formData.date = ''
       formData.time = ''
       formData.service = ''
@@ -92,7 +92,7 @@ const handleSubmit = async () => {
   fireConfetti()
     // Сброс формы
     formData.name = ''
-    formData.phone = PHONE_PREFIX
+    formData.phone = ''
     formData.date = ''
     formData.time = ''
     formData.service = ''
@@ -207,15 +207,13 @@ onUnmounted(() => {
           id="phone"
           v-model="formData.phone"
           @input="handlePhoneInput"
-          @click="handlePhoneClick"
-          @focus="handlePhoneClick"
-          @keydown="handlePhoneKeydown"
           type="tel" 
           class="form-input"
           :placeholder="$t('appointment.phonePlaceholder')"
           :maxlength="PHONE_LENGTH"
           required
           autocomplete="tel"
+          inputmode="tel"
         />
       </div>
 

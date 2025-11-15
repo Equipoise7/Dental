@@ -3,7 +3,7 @@
  * Формат: +7 (XXX) XXX-XX-XX
  */
 export function usePhoneFormat() {
-  const PHONE_PREFIX = '+7 ('
+  const PHONE_PREFIX = '+7 '
   const PHONE_LENGTH = 18 // Полная длина отформатированного номера
 
   /**
@@ -15,40 +15,35 @@ export function usePhoneFormat() {
     // Удаляем все кроме цифр
     let numbers = value.replace(/\D/g, '')
     
-    // Если пользователь попытался удалить 7, возвращаем её обратно
-    if (!numbers.startsWith('7')) {
-      numbers = '7' + numbers
+    // Убираем первую 7 или 8, оставляем только 10 цифр
+    if (numbers.startsWith('7') || numbers.startsWith('8')) {
+      numbers = numbers.substring(1)
     }
     
-    // Убираем лишние цифры (максимум 11)
-    numbers = numbers.substring(0, 11)
+    // Максимум 10 цифр
+    numbers = numbers.substring(0, 10)
     
-    // Начинаем формат с +7 (
-    let formatted = '+7 ('
+    // Форматируем
+    let formatted = '+7 '
     
-    // Добавляем код оператора (3 цифры после 7)
-    if (numbers.length > 1) {
-      formatted += numbers.substring(1, 4)
+    if (numbers.length > 0) {
+      formatted += '(' + numbers.substring(0, 3)
     }
     
-    // Закрываем скобку после 3 цифр кода
-    if (numbers.length >= 4) {
-      formatted += ')'
+    if (numbers.length >= 3) {
+      formatted += ') '
     }
     
-    // Добавляем первую часть номера (3 цифры)
-    if (numbers.length > 4) {
-      formatted += ' ' + numbers.substring(4, 7)
+    if (numbers.length > 3) {
+      formatted += numbers.substring(3, 6)
     }
     
-    // Добавляем дефис и вторую часть (2 цифры)
-    if (numbers.length > 7) {
-      formatted += '-' + numbers.substring(7, 9)
+    if (numbers.length > 6) {
+      formatted += '-' + numbers.substring(6, 8)
     }
     
-    // Добавляем дефис и последнюю часть (2 цифры)
-    if (numbers.length > 9) {
-      formatted += '-' + numbers.substring(9, 11)
+    if (numbers.length > 8) {
+      formatted += '-' + numbers.substring(8, 10)
     }
     
     return formatted
@@ -61,7 +56,7 @@ export function usePhoneFormat() {
    */
   const validatePhone = (phone) => {
     const numbers = phone.replace(/\D/g, '')
-    return numbers.length === 11 && numbers.startsWith('7')
+    return numbers.length === 10
   }
 
   /**
@@ -71,131 +66,54 @@ export function usePhoneFormat() {
    */
   const handlePhoneInput = (event, formData) => {
     const input = event.target
-    let cursorPosition = input.selectionStart
-    const oldValue = formData.phone
-    let inputValue = input.value
+    const cursorPosition = input.selectionStart
+    const oldValue = formData.phone || ''
+    const inputValue = input.value
     
-    // Если пытаются удалить "+7 ", просто возвращаем "+7 ("
-    if (inputValue.length < 4 || !inputValue.startsWith('+7 ')) {
-      formData.phone = PHONE_PREFIX
-      setTimeout(() => input.setSelectionRange(4, 4), 0)
-      return
-    }
+    // Считаем количество цифр до курсора в старом значении
+    const digitsBeforeCursor = oldValue.substring(0, cursorPosition).replace(/\D/g, '').length
     
-    // Форматируем номер
+    // Форматируем новое значение
     const formatted = formatPhone(inputValue)
     formData.phone = formatted
     
-    // Устанавливаем курсор
+    // Восстанавливаем позицию курсора
     setTimeout(() => {
-      // Если курсор пытается встать перед +7 (, переносим его после
-      if (cursorPosition < 4) {
-        input.setSelectionRange(4, 4)
-        return
+      // Находим позицию курсора по количеству цифр
+      let newPosition = 0
+      let digitCount = 0
+      
+      for (let i = 0; i < formatted.length; i++) {
+        if (digitCount === digitsBeforeCursor) {
+          newPosition = i
+          break
+        }
+        if (/\d/.test(formatted[i])) {
+          digitCount++
+        }
       }
       
-      // Если добавили символы, двигаем курсор вперёд
-      if (formatted.length > oldValue.length) {
-        // Пропускаем служебные символы
-        let newPosition = cursorPosition + (formatted.length - oldValue.length)
-        while (newPosition < formatted.length && 
-               (formatted[newPosition] === ')' || 
-                formatted[newPosition] === ' ' || 
-                formatted[newPosition] === '-')) {
-          newPosition++
-        }
-        input.setSelectionRange(newPosition, newPosition)
-      } else {
-        // При удалении сохраняем позицию курсора
-        let newPosition = cursorPosition
-        // Если курсор стоит на служебном символе, сдвигаем влево
-        while (newPosition > 4 && newPosition < formatted.length &&
-               (formatted[newPosition - 1] === ')' || 
-                formatted[newPosition - 1] === ' ' || 
-                formatted[newPosition - 1] === '-')) {
-          newPosition--
-        }
-        input.setSelectionRange(newPosition, newPosition)
+      // Если курсор должен быть в конце
+      if (digitCount === digitsBeforeCursor) {
+        newPosition = formatted.length
       }
+      
+      input.setSelectionRange(newPosition, newPosition)
     }, 0)
   }
 
   /**
-   * Обработчик клика/фокуса - защита префикса
-   * @param {Event} event - Событие
+   * Обработчик клика/фокуса - не требуется
    */
-  const handlePhoneClick = (event) => {
-    const input = event.target
-    
-    requestAnimationFrame(() => {
-      if (input.selectionStart < 4) {
-        input.setSelectionRange(4, 4)
-      }
-    })
+  const handlePhoneClick = () => {
+    // Пустая функция для обратной совместимости
   }
 
   /**
-   * Обработчик нажатия клавиш
-   * @param {Event} event - Событие keydown
+   * Обработчик нажатия клавиш - не требуется
    */
-  const handlePhoneKeydown = (event) => {
-    const input = event.target
-    const cursorPosition = input.selectionStart
-    const selectionEnd = input.selectionEnd
-    const currentValue = input.value
-    
-    // Если есть выделение и оно включает префикс, корректируем
-    if (cursorPosition !== selectionEnd && cursorPosition < 4) {
-      event.preventDefault()
-      input.setSelectionRange(4, selectionEnd)
-      return
-    }
-    
-    // Обработка Backspace
-    if (event.key === 'Backspace') {
-      // Если курсор в начале (в префиксе +7 (), блокируем
-      if (cursorPosition <= 4) {
-        event.preventDefault()
-        input.setSelectionRange(4, 4)
-        return
-      }
-      
-      // Если курсор стоит на служебном символе (скобка, пробел, дефис), пропускаем его
-      const charBefore = currentValue[cursorPosition - 1]
-      if (charBefore === ')' || charBefore === ' ' || charBefore === '-') {
-        event.preventDefault()
-        // Находим предыдущую цифру и удаляем её
-        let newValue = currentValue.slice(0, cursorPosition - 1) + currentValue.slice(cursorPosition)
-        // Перформатируем
-        const formatted = formatPhone(newValue)
-        input.value = formatted
-        input.dispatchEvent(new Event('input', { bubbles: true }))
-        return
-      }
-    }
-    
-    // Обработка Delete
-    if (event.key === 'Delete') {
-      // Если курсор в префиксе, блокируем
-      if (cursorPosition < 4) {
-        event.preventDefault()
-        input.setSelectionRange(4, 4)
-        return
-      }
-      
-      // Если курсор стоит перед служебным символом, пропускаем его
-      const charAfter = currentValue[cursorPosition]
-      if (charAfter === ')' || charAfter === ' ' || charAfter === '-') {
-        event.preventDefault()
-        // Находим следующую цифру и удаляем её
-        let newValue = currentValue.slice(0, cursorPosition) + currentValue.slice(cursorPosition + 1)
-        // Перформатируем
-        const formatted = formatPhone(newValue)
-        input.value = formatted
-        input.dispatchEvent(new Event('input', { bubbles: true }))
-        return
-      }
-    }
+  const handlePhoneKeydown = () => {
+    // Пустая функция для обратной совместимости
   }
 
   return {
