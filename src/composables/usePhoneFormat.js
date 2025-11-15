@@ -75,17 +75,10 @@ export function usePhoneFormat() {
     const oldValue = formData.phone
     let inputValue = input.value
     
-    // Если пользователь пытается удалить "+7 (", возвращаем обратно
-    if (!inputValue.startsWith(PHONE_PREFIX)) {
+    // Если пытаются удалить "+7 ", просто возвращаем "+7 ("
+    if (inputValue.length < 4 || !inputValue.startsWith('+7 ')) {
       formData.phone = PHONE_PREFIX
-      input.setSelectionRange(4, 4)
-      return
-    }
-    
-    // Если длина меньше 4 символов, восстанавливаем "+7 ("
-    if (inputValue.length < 4) {
-      formData.phone = PHONE_PREFIX
-      input.setSelectionRange(4, 4)
+      setTimeout(() => input.setSelectionRange(4, 4), 0)
       return
     }
     
@@ -113,7 +106,16 @@ export function usePhoneFormat() {
         }
         input.setSelectionRange(newPosition, newPosition)
       } else {
-        input.setSelectionRange(cursorPosition, cursorPosition)
+        // При удалении сохраняем позицию курсора
+        let newPosition = cursorPosition
+        // Если курсор стоит на служебном символе, сдвигаем влево
+        while (newPosition > 4 && newPosition < formatted.length &&
+               (formatted[newPosition - 1] === ')' || 
+                formatted[newPosition - 1] === ' ' || 
+                formatted[newPosition - 1] === '-')) {
+          newPosition--
+        }
+        input.setSelectionRange(newPosition, newPosition)
       }
     }, 0)
   }
@@ -139,10 +141,20 @@ export function usePhoneFormat() {
   const handlePhoneKeydown = (event) => {
     const input = event.target
     const cursorPosition = input.selectionStart
+    const selectionEnd = input.selectionEnd
     
-    // Блокируем Backspace и Delete если курсор в префиксе
-    if ((event.key === 'Backspace' || event.key === 'Delete') && cursorPosition <= 4) {
+    // Если есть выделение и оно включает префикс, корректируем
+    if (cursorPosition !== selectionEnd && cursorPosition < 4) {
       event.preventDefault()
+      input.setSelectionRange(4, selectionEnd)
+      return
+    }
+    
+    // Блокируем Backspace и Delete только если курсор строго в начале префикса
+    if ((event.key === 'Backspace' && cursorPosition <= 4) || 
+        (event.key === 'Delete' && cursorPosition < 4)) {
+      event.preventDefault()
+      input.setSelectionRange(4, 4)
     }
   }
 
